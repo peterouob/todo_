@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 )
 
@@ -20,7 +21,9 @@ func main() {
 			"msg": "POST METHOD",
 		})
 	})
-	r.Run(":8084")
+	if err := r.Run(":8080"); err != nil {
+		log.Panicf("errors:%s", err.Error())
+	}
 }
 
 func Cors(c *gin.Context) {
