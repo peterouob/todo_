@@ -3,24 +3,28 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv/autoload"
+	"github.com/peterouob/todo_/mysql"
+	"github.com/peterouob/todo_/router"
 	"log"
 	"net/http"
 )
 
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Panicf("error to load env file ... :%s", err.Error())
+	}
+}
+
 func main() {
+	go func() {
+		mysql.InitMysql()
+	}()
+
 	r := gin.Default()
 	r.Use(Cors)
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"msg": "GET METHOD",
-		})
-	})
-
-	r.POST("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"msg": "POST METHOD",
-		})
-	})
+	router.InitRouter(r)
 	if err := r.Run(":8080"); err != nil {
 		log.Panicf("errors:%s", err.Error())
 	}
