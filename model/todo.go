@@ -12,7 +12,3 @@ type Todo struct {
 	Done     bool      `json:"done"`
 	DeadLine time.Time `json:"date_time"`
 }
-
-func (t *Todo) TableName() string {
-	return "todo"
-}

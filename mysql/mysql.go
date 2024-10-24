@@ -16,9 +16,15 @@ var DB *gorm.DB
 
 func InitMysql() {
 	initMysql()
-	dsn, _ := url.Parse(os.Getenv("DSN"))
+	dsn, err := url.Parse(os.Getenv("DSN"))
+	if err != nil {
+		log.Printf("error in parse url:%s", err.Error())
+	}
 	dsn.RawQuery = os.Getenv("MODE")
-	db, _ := gorm.Open(mysql2.Open(dsn.String()), &gorm.Config{})
+	db, err := gorm.Open(mysql2.Open(dsn.String()), &gorm.Config{})
+	if err != nil {
+		log.Printf("error in connect mysql:%s", err.Error())
+	}
 	DB = db
 	log.Println("connect mysql ...")
 	if err := DB.AutoMigrate(&model.User{}); err != nil {

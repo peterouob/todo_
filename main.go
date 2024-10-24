@@ -25,7 +25,7 @@ func main() {
 	r := gin.Default()
 	r.Use(Cors)
 	router.InitRouter(r)
-	if err := r.Run(":8080"); err != nil {
+	if err := r.Run(":8084"); err != nil {
 		log.Panicf("errors:%s", err.Error())
 	}
 }
