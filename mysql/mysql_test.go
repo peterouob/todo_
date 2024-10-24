@@ -38,16 +38,16 @@ func Test_Connect(t *testing.T) {
 
 func testInitMySQLTLSConfig(t *testing.T) {
 	rootCertPool := x509.NewCertPool()
-
-	pem, err := os.ReadFile(os.Getenv("PEM_PATH"))
-	if err != nil {
-		t.Errorf("cannot load pem: %v", err)
+	pem := []byte(os.Getenv("MYSQL_PEM_KEY"))
+	if len(pem) == 0 {
+		t.Errorf("PEM content is empty")
 	}
+
 	if ok := rootCertPool.AppendCertsFromPEM(pem); !ok {
 		t.Errorf("cannot append pem")
 	}
 
-	if err = mysql.RegisterTLSConfig("custom", &tls.Config{
+	if err := mysql.RegisterTLSConfig("custom", &tls.Config{
 		RootCAs:            rootCertPool,
 		InsecureSkipVerify: true,
 	}); err != nil {

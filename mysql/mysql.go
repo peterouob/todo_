@@ -28,7 +28,7 @@ func InitMysql() {
 
 func initMysql() {
 	rootCertPool := x509.NewCertPool()
-	pem, _ := os.ReadFile(os.Getenv("PEM_PATH"))
+	pem, _ := os.ReadFile(os.Getenv("MYSQL_PEM_KEY"))
 	rootCertPool.AppendCertsFromPEM(pem)
 	mysql.RegisterTLSConfig("custom", &tls.Config{
 		RootCAs:            rootCertPool,
