@@ -18,12 +18,12 @@ func InitMysql() {
 	initMysql()
 	dsn, err := url.Parse(os.Getenv("DSN"))
 	if err != nil {
-		log.Printf("error in parse url:%s", err.Error())
+		log.Printf("error in parse url:%s\n", err.Error())
 	}
 	dsn.RawQuery = os.Getenv("MODE")
 	db, err := gorm.Open(mysql2.Open(dsn.String()), &gorm.Config{})
 	if err != nil {
-		log.Printf("error in connect mysql:%s", err.Error())
+		log.Printf("error in connect mysql:%s\n", err.Error())
 	}
 	DB = db
 	log.Println("connect mysql ...")
@@ -36,8 +36,10 @@ func initMysql() {
 	rootCertPool := x509.NewCertPool()
 	pem, _ := os.ReadFile(os.Getenv("MYSQL_PEM_KEY"))
 	rootCertPool.AppendCertsFromPEM(pem)
-	mysql.RegisterTLSConfig("custom", &tls.Config{
+	if err := mysql.RegisterTLSConfig("custom", &tls.Config{
 		RootCAs:            rootCertPool,
 		InsecureSkipVerify: true,
-	})
+	});err != nil {
+		log.Printf("error in register pool:%s",err.Error()),
+	}
 }
