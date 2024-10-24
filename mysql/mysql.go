@@ -4,8 +4,10 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"github.com/go-sql-driver/mysql"
+	"github.com/peterouob/todo_/model"
 	mysql2 "gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"log"
 	"net/url"
 	"os"
 )
@@ -18,6 +20,10 @@ func InitMysql() {
 	dsn.RawQuery = os.Getenv("MODE")
 	db, _ := gorm.Open(mysql2.Open(dsn.String()), &gorm.Config{})
 	DB = db
+	log.Println("connect mysql ...")
+	if err := DB.AutoMigrate(&model.User{}); err != nil {
+		log.Panicf("error to migrate model.User:%s", err.Error())
+	}
 }
 
 func initMysql() {
