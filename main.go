@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/peterouob/todo_/mysql"
 	"github.com/peterouob/todo_/router"
@@ -11,11 +10,12 @@ import (
 	"net/http"
 )
 
-func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Panicf("error to load env file ... :%s", err.Error())
-	}
-}
+//
+//func init() {
+//	if err := godotenv.Load(); err != nil {
+//		log.Panicf("error to load env file ... :%s", err.Error())
+//	}
+//}
 
 func main() {
 	go func() {
