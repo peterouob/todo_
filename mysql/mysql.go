@@ -39,7 +39,7 @@ func initMysql() {
 	if err := mysql.RegisterTLSConfig("custom", &tls.Config{
 		RootCAs:            rootCertPool,
 		InsecureSkipVerify: true,
-	});err != nil {
-		log.Printf("error in register pool:%s",err.Error()),
+	}); err != nil {
+		log.Printf("error in register pool:%s", err.Error())
 	}
 }
