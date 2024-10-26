@@ -2,11 +2,13 @@ package service
 
 import (
 	"errors"
+	"fmt"
+	"github.com/bwmarrin/snowflake"
 	"github.com/gin-gonic/gin"
 	"github.com/peterouob/todo_/model"
-	"github.com/peterouob/todo_/mysql"
-	"gorm.io/gorm"
+	"github.com/peterouob/todo_/utils"
 	"net/http"
+	"strconv"
 )
 
 func RegisterUser(c *gin.Context) {
@@ -14,24 +16,36 @@ func RegisterUser(c *gin.Context) {
 	if err := c.BindJSON(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": -1,
-			"msg":  "bind user data error:" + err.Error(),
+			"msg":  err.Error(),
 		})
 		return
 	}
 
-	if err := mysql.DB.Where("username=?", user.Username).First(&user).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-		mysql.DB.Create(&user)
-		c.JSON(http.StatusOK, gin.H{
-			"code": 0,
-			"msg":  "welcome",
-		})
-	} else {
+	if user.Username == "" || user.Password == "" {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": -1,
-			"msg":  "have same user!",
+			"msg":  errors.New("username or password cannot be empty"),
 		})
 		return
 	}
+	node, err := snowflake.NewNode(1)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	user.ID = node.Generate().Int64()
+	if err := registerUser(user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": -1,
+			"msg":  err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"msg":  "welcome",
+	})
 }
 
 func LoginUser(c *gin.Context) {
@@ -39,20 +53,43 @@ func LoginUser(c *gin.Context) {
 	if err := c.BindJSON(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": -1,
-			"msg":  "bind user data error:" + err.Error(),
+			"msg":  err.Error(),
 		})
 		return
 	}
 
-	if err := mysql.DB.Where("username=? AND password=?", user.Username, user.Password).First(&user).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+	if user.Username == "" || user.Password == "" {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": -1,
-			"msg":  "error in login",
+			"msg":  errors.New("username or password cannot be empty"),
 		})
 		return
 	}
+	uid, err := loginUser(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": -1,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	utils.SetCookie(c, "id", strconv.FormatInt(uid, 10))
+
+	tk, rtk, err := utils.CreateToken(uid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":              -1,
+			"create token err:": err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg":  "success login",
+		"code":          0,
+		"msg:":          "login success",
+		"data":          user,
+		"token":         tk,
+		"refresh_token": rtk,
 	})
 }
