@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/peterouob/todo_/mysql"
+	"github.com/peterouob/todo_/db"
 	"github.com/peterouob/todo_/router"
 	"log"
 	"net/http"
@@ -19,7 +19,8 @@ import (
 
 func main() {
 	go func() {
-		mysql.InitMysql()
+		db.InitMysql()
+		db.InitMongo()
 	}()
 
 	r := gin.Default()

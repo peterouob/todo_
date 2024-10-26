@@ -16,6 +16,7 @@ func RegisterUser(c *gin.Context) {
 			"code": -1,
 			"msg":  "bind user data error:" + err.Error(),
 		})
+		return
 	}
 
 	if err := mysql.DB.Where("username=?", user.Username).First(&user).Error; errors.Is(err, gorm.ErrRecordNotFound) {
@@ -40,6 +41,7 @@ func LoginUser(c *gin.Context) {
 			"code": -1,
 			"msg":  "bind user data error:" + err.Error(),
 		})
+		return
 	}
 
 	if err := mysql.DB.Where("username=? AND password=?", user.Username, user.Password).First(&user).Error; errors.Is(err, gorm.ErrRecordNotFound) {

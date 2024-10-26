@@ -1,14 +1,10 @@
 package model
 
-import (
-	"gorm.io/gorm"
-	"time"
-)
+import "time"
 
 type Todo struct {
-	gorm.Model
-	Title    string    `json:"title"`
-	Content  string    `json:"content"`
-	Done     bool      `json:"done"`
-	DeadLine time.Time `json:"date_time"`
+	Title    string    `json:"title" bson:"title"`
+	Content  string    `json:"content" bson:"content"`
+	DeadTime time.Time `json:"dead_time" bson:"deadTime"`
+	Done     bool      `json:"done" bson:"done"`
 }

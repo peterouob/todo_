@@ -1,4 +1,4 @@
-package mysql
+package db
 
 import (
 	"crypto/tls"
@@ -26,7 +26,7 @@ func InitMysql() {
 		log.Printf("error in connect mysql:%s\n", err.Error())
 	}
 	DB = db
-	log.Println("connect mysql ...")
+	log.Printf("connect mysql ... %+v \n", DB)
 	if err := DB.AutoMigrate(&model.User{}); err != nil {
 		log.Panicf("error to migrate model.User:%s", err.Error())
 	}

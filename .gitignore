@@ -117,4 +117,4 @@ fabric.properties
 ## S/MIME message
 *.smime
 
-/mysql/test.env
+/db/test.env
