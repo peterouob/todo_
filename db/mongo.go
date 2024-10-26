@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-var Mgo *mongo.Client
+var Mgo *mongo.Collection
 
 func InitMongo() {
 	opts := options.Client().ApplyURI(os.Getenv("MONGO"))
@@ -17,5 +17,6 @@ func InitMongo() {
 		log.Panicf("error in connect mongo db:%s", err.Error())
 		return
 	}
-	Mgo = client
+	Mgo = client.Database("todo").Collection("todo")
+	log.Println("mongo connect success ...")
 }
