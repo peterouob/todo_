@@ -103,10 +103,11 @@ func createTodo(todo model.Todo, ctx context.Context) error {
 func doneTodo(id primitive.ObjectID, ctx context.Context) error {
 	if id.IsZero() {
 		return errors.New("the id cannot be empty")
-
 	}
+
 	update := bson.M{"$set": bson.M{"done": true}}
 	result, err := db.Mgo.UpdateByID(ctx, id, update)
+
 	if result.MatchedCount != 1 {
 		return errors.New("not found the id which want to update")
 	}
