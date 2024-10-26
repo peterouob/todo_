@@ -26,7 +26,7 @@ func InitMysql() {
 		log.Printf("error in connect mysql:%s\n", err.Error())
 	}
 	DB = db
-	log.Printf("connect mysql ... %+v \n", DB)
+	log.Println("connect mysql ...")
 	if err := DB.AutoMigrate(&model.User{}); err != nil {
 		log.Panicf("error to migrate model.User:%s", err.Error())
 	}
