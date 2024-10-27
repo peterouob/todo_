@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 func GetAllTodo(c *gin.Context) {
@@ -139,6 +140,13 @@ func CreateTodo(c *gin.Context) {
 		})
 		return
 	}
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "error in parse time :" + err.Error(),
+		})
+		return
+	}
 	if err = createTodo(todo, context.TODO()); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
@@ -174,5 +182,37 @@ func Done(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"id":   id,
+	})
+}
+
+func FilterByMonthAndYear(c *gin.Context) {
+	month, err := strconv.Atoi(c.Query("m"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "error in format query string",
+		})
+		return
+	}
+	year, err := strconv.Atoi(c.Query("y"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "error in format query string",
+		})
+		return
+	}
+
+	data, err := findByMonthAndYear(month, year, context.TODO())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"data": data,
 	})
 }

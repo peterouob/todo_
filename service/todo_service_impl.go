@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"time"
 )
 
 func findAllTodo(ctx context.Context) ([]model.Todo, error) {
@@ -115,4 +116,43 @@ func doneTodo(id primitive.ObjectID, ctx context.Context) error {
 		return errors.New("error in update todo :" + err.Error())
 	}
 	return nil
+}
+
+func findByMonthAndYear(month, year int, ctx context.Context) ([]model.TodoGroup, error) {
+	startTime := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	endTime := startTime.AddDate(0, 1, 0)
+	pipeline := mongo.Pipeline{
+		{
+			{"$match", bson.D{
+				{"deadTime", bson.D{
+					{"$gte", startTime},
+					{"$lt", endTime},
+				}},
+			}},
+		},
+		{
+			{"$group", bson.D{
+				{"_id", bson.D{
+					{"year", bson.D{{"$year", "$deadTime"}}},
+					{"month", bson.D{{"$month", "$deadTime"}}},
+				}},
+				{"todos", bson.D{{"$push", bson.D{
+					{"_id", "$_id"},
+					{"title", "$title"},
+					{"content", "$content"},
+					{"deadTime", "$deadTime"},
+					{"done", "$done"},
+				}}}},
+			}},
+		},
+	}
+	cursor, err := db.Mgo.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, errors.New("error in mongo aggregate pipeline :" + err.Error())
+	}
+	var result []model.TodoGroup
+	if err := cursor.All(ctx, &result); err != nil {
+		return nil, errors.New("error in get the value for result :" + err.Error())
+	}
+	return result, nil
 }

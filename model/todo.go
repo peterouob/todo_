@@ -14,6 +14,14 @@ type Todo struct {
 	Done     bool               `default:"false" json:"done" bson:"done"`
 }
 
+type TodoGroup struct {
+	GroupID struct {
+		Year  int `bson:"year"`
+		Month int `bson:"month"`
+	} `bson:"_id"`
+	Todos []Todo `json:"todos" bson:"todos"`
+}
+
 type FindTodoRequest struct {
 	Done bool `default:"false" json:"done" bson:"done,omitempty"`
 }
