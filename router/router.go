@@ -7,7 +7,7 @@ import (
 )
 
 func InitRouter(r *gin.Engine) {
-	r.Use(utils.Cors)
+	r.Use(utils.Cors, utils.ValidApiKey)
 	r.GET("/")
 	r.POST("/login", service.LoginUser)
 	r.POST("/register", service.RegisterUser)
@@ -16,7 +16,8 @@ func InitRouter(r *gin.Engine) {
 	{
 		todo.GET("/", service.GetAllTodo)
 		todo.GET("/:id", service.GetTodoByID)
-		todo.POST("/filter", service.GetTodoFilterDone)
+		todo.GET("/filter", service.FilterByMonthAndYear)
+		todo.POST("/done", service.GetTodoFilterDone)
 		todo.POST("/create", service.CreateTodo)
 		todo.PUT("/:id", service.UpdateTodo)
 		todo.DELETE("/:id", service.DeleteTodo)
