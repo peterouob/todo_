@@ -1,11 +1,13 @@
 package utils
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/peterouob/todo_/db"
 	token2 "github.com/peterouob/todo_/model"
 	"log"
 	"os"
@@ -119,24 +121,43 @@ func createRefreshToken(id int64, value string) (*token2.RefreshToken, error) {
 func VerifyToken(c *gin.Context, tokenString string) (*jwt.Token, error) {
 	uidStr, err := c.Cookie("id")
 	if err != nil {
-		return nil, errors.New("get cookie value error :" + err.Error())
-	}
-	id, err := strconv.ParseInt(uidStr, 0, 64)
-	if err != nil {
-		return nil, errors.New("parse string 2 uint64 error :" + err.Error())
+		return nil, errors.New("get cookie value error: " + err.Error())
 	}
 
-	//TODO: get token value from redis and valid if it the tokenString contain in the MSET which i save in redis
-	GetTokenMapById(id)
+	id, err := strconv.ParseInt(uidStr, 0, 64)
+	if err != nil {
+		return nil, errors.New("parse string to int64 error: " + err.Error())
+	}
+
+	accessTokenKey := fmt.Sprintf("%d:access", id)
+	refreshTokenKey := fmt.Sprintf("%d:refresh", id)
+
+	accessToken, err := db.Rdb.HGet(context.Background(), accessTokenKey, "token").Result()
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving access token from Redis: %v", err)
+	}
+
+	refreshToken, err := db.Rdb.HGet(context.Background(), refreshTokenKey, "token").Result()
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving refresh token from Redis: %v", err)
+	}
 
 	token, err := jwt.Parse(tokenString, func(tk *jwt.Token) (interface{}, error) {
 		if _, ok := tk.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected method: %v", tk.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", tk.Header["alg"])
 		}
-		return []byte(os.Getenv("TOKENREKEY")), nil
+		if tokenString == accessToken {
+			return []byte(os.Getenv("TOKENKEY")), nil
+
+		} else if tokenString == refreshToken {
+			return []byte(os.Getenv("TOKENREKEY")), nil
+		}
+		return nil, errors.New("not found the correct token value")
 	})
-	if err != nil {
-		return nil, fmt.Errorf("error in parse token %v : %s", token, err.Error())
+
+	if err != nil || !token.Valid {
+		return nil, fmt.Errorf("error parsing token or token is invalid: %v", err)
 	}
+
 	return token, nil
 }

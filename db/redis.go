@@ -18,5 +18,5 @@ func InitRedis() {
 		DB:       db,
 	})
 	Rdb = rdb
-	log.Println("connect redis ...")
+	log.Println("connect redis success ...")
 }
