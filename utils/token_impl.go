@@ -41,15 +41,3 @@ func SaveToken(id int64, tk *model.Token, rtk *model.RefreshToken) error {
 
 	return nil
 }
-
-func DeleteOldToken(key int64) error {
-	if err := db.Rdb.HDel(context.Background(), strconv.FormatInt(key, 10)).Err(); err != nil {
-		return errors.New("error in delete old token")
-	}
-	return nil
-}
-
-func GetTokenMapById(id int64) []interface{} {
-	result := db.Rdb.HMGet(context.Background(), strconv.FormatInt(id, 10))
-	return result.Val()
-}
