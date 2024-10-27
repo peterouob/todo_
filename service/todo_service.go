@@ -12,7 +12,17 @@ import (
 )
 
 func GetAllTodo(c *gin.Context) {
-	data, err := findAllTodo(context.TODO())
+	userIdStr, _ := c.Cookie("id")
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "invalid user ID in cookie",
+		})
+		return
+	}
+
+	data, err := findAllTodo(context.TODO(), userId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
@@ -36,7 +46,17 @@ func GetTodoFilterDone(c *gin.Context) {
 		return
 	}
 
-	data, err := findTodoFilterDone(req.Done, context.TODO())
+	userIdStr, _ := c.Cookie("id")
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "invalid user ID in cookie",
+		})
+		return
+	}
+
+	data, err := findTodoFilterDone(req.Done, userId, context.TODO())
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
@@ -60,7 +80,18 @@ func GetTodoByID(c *gin.Context) {
 		})
 		return
 	}
-	data, err := findById(objectId, context.TODO())
+
+	userIdStr, _ := c.Cookie("id")
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "invalid user ID in cookie",
+		})
+		return
+	}
+
+	data, err := findById(objectId, userId, context.TODO())
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
@@ -85,7 +116,18 @@ func DeleteTodo(c *gin.Context) {
 		})
 		return
 	}
-	if err := deleteTodo(objectId, context.TODO()); err != nil {
+
+	userIdStr, _ := c.Cookie("id")
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "invalid user ID in cookie",
+		})
+		return
+	}
+
+	if err := deleteTodo(objectId, userId, context.TODO()); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
 			"msg":  err.Error(),
@@ -108,6 +150,17 @@ func UpdateTodo(c *gin.Context) {
 		})
 		return
 	}
+
+	userIdStr, _ := c.Cookie("id")
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "invalid user ID in cookie",
+		})
+		return
+	}
+
 	req := model.UpdateTodoRequest{}
 
 	if err := c.ShouldBind(&req); !errors.Is(err, io.EOF) && err != nil {
@@ -118,7 +171,7 @@ func UpdateTodo(c *gin.Context) {
 		return
 	}
 
-	if err := updateTodo(objectId, req, context.TODO()); err != nil {
+	if err := updateTodo(objectId, req, userId, context.TODO()); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
 			"msg":  err.Error(),
@@ -140,14 +193,18 @@ func CreateTodo(c *gin.Context) {
 		})
 		return
 	}
+
+	userIdStr, _ := c.Cookie("id")
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
-			"msg":  "error in parse time :" + err.Error(),
+			"msg":  "invalid user ID in cookie",
 		})
 		return
 	}
-	if err = createTodo(todo, context.TODO()); err != nil {
+
+	if err = createTodo(todo, userId, context.TODO()); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
 			"msg":  err.Error(),
@@ -172,7 +229,18 @@ func Done(c *gin.Context) {
 		})
 		return
 	}
-	if err := doneTodo(objectId, context.TODO()); err != nil {
+
+	userIdStr, _ := c.Cookie("id")
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "invalid user ID in cookie",
+		})
+		return
+	}
+
+	if err := doneTodo(objectId, userId, context.TODO()); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
 			"msg":  err.Error(),
@@ -203,7 +271,17 @@ func FilterByMonthAndYear(c *gin.Context) {
 		return
 	}
 
-	data, err := findByMonthAndYear(month, year, context.TODO())
+	userIdStr, _ := c.Cookie("id")
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "invalid user ID in cookie",
+		})
+		return
+	}
+
+	data, err := findByMonthAndYear(month, year, userId, context.TODO())
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,

@@ -12,6 +12,7 @@ type Todo struct {
 	Content  string             `json:"content" bson:"content"`
 	DeadTime time.Time          `json:"dead_time" bson:"deadTime"`
 	Done     bool               `default:"false" json:"done" bson:"done"`
+	UserID   int64              `json:"user_id" bson:"userID"`
 }
 
 type TodoGroup struct {

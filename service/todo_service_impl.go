@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-func findAllTodo(ctx context.Context) ([]model.Todo, error) {
-	filter := bson.M{}
+func findAllTodo(ctx context.Context, userId int64) ([]model.Todo, error) {
+	filter := bson.M{"userID": userId} // 根据用户 ID 过滤
 	sortFilter := bson.D{bson.E{Key: "deadTime", Value: 1}}
 	opts := options.Find().SetSort(sortFilter)
 	cursor, err := db.Mgo.Find(ctx, filter, opts)
@@ -28,8 +28,8 @@ func findAllTodo(ctx context.Context) ([]model.Todo, error) {
 	return result, nil
 }
 
-func findTodoFilterDone(done bool, ctx context.Context) ([]model.Todo, error) {
-	filter := bson.M{"done": done}
+func findTodoFilterDone(done bool, userId int64, ctx context.Context) ([]model.Todo, error) {
+	filter := bson.M{"done": done, "userID": userId} // 根据用户 ID 过滤
 	sortFilter := bson.D{bson.E{Key: "deadTime", Value: 1}}
 
 	opts := options.Find().SetSort(sortFilter)
@@ -45,14 +45,14 @@ func findTodoFilterDone(done bool, ctx context.Context) ([]model.Todo, error) {
 	return result, nil
 }
 
-func findById(id primitive.ObjectID, ctx context.Context) (model.Todo, error) {
+func findById(id primitive.ObjectID, userId int64, ctx context.Context) (model.Todo, error) {
 	var todo model.Todo
 
 	if id.IsZero() {
 		return todo, errors.New("the id cannot be empty")
 	}
 
-	filter := bson.M{"_id": bson.M{"$eq": id}}
+	filter := bson.M{"_id": bson.M{"$eq": id}, "userID": userId} // 根据用户 ID 过滤
 	err := db.Mgo.FindOne(ctx, filter).Decode(&todo)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return todo, errors.New("not found the id which want to find")
@@ -63,11 +63,11 @@ func findById(id primitive.ObjectID, ctx context.Context) (model.Todo, error) {
 	return todo, nil
 }
 
-func deleteTodo(id primitive.ObjectID, ctx context.Context) error {
+func deleteTodo(id primitive.ObjectID, userId int64, ctx context.Context) error {
 	if id.IsZero() {
 		return errors.New("the id cannot be empty")
 	}
-	filter := bson.M{"_id": bson.M{"$eq": id}}
+	filter := bson.M{"_id": bson.M{"$eq": id}, "userID": userId} // 根据用户 ID 过滤
 	_, err := db.Mgo.DeleteOne(ctx, filter)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return errors.New("not found the id which want to delete")
@@ -77,11 +77,12 @@ func deleteTodo(id primitive.ObjectID, ctx context.Context) error {
 	}
 	return nil
 }
-func updateTodo(id primitive.ObjectID, req model.UpdateTodoRequest, ctx context.Context) error {
+
+func updateTodo(id primitive.ObjectID, req model.UpdateTodoRequest, userId int64, ctx context.Context) error {
 	if id.IsZero() {
 		return errors.New("the id cannot be empty")
 	}
-	filter := bson.M{"_id": bson.M{"$eq": id}}
+	filter := bson.M{"_id": bson.M{"$eq": id}, "userID": userId} // 根据用户 ID 过滤
 	update := bson.M{"$set": req}
 	result, err := db.Mgo.UpdateOne(ctx, filter, update)
 	if result.MatchedCount != 1 {
@@ -93,7 +94,8 @@ func updateTodo(id primitive.ObjectID, req model.UpdateTodoRequest, ctx context.
 	return nil
 }
 
-func createTodo(todo model.Todo, ctx context.Context) error {
+func createTodo(todo model.Todo, id int64, ctx context.Context) error {
+	todo.UserID = id
 	_, err := db.Mgo.InsertOne(ctx, todo)
 	if err != nil {
 		return errors.New("error in insert data from collection:" + err.Error())
@@ -101,13 +103,14 @@ func createTodo(todo model.Todo, ctx context.Context) error {
 	return nil
 }
 
-func doneTodo(id primitive.ObjectID, ctx context.Context) error {
+func doneTodo(id primitive.ObjectID, userId int64, ctx context.Context) error {
 	if id.IsZero() {
 		return errors.New("the id cannot be empty")
 	}
 
 	update := bson.M{"$set": bson.M{"done": true}}
-	result, err := db.Mgo.UpdateByID(ctx, id, update)
+	filter := bson.M{"_id": id, "userID": userId}
+	result, err := db.Mgo.UpdateOne(ctx, filter, update)
 
 	if result.MatchedCount != 1 {
 		return errors.New("not found the id which want to update")
@@ -118,7 +121,7 @@ func doneTodo(id primitive.ObjectID, ctx context.Context) error {
 	return nil
 }
 
-func findByMonthAndYear(month, year int, ctx context.Context) ([]model.TodoGroup, error) {
+func findByMonthAndYear(month, year int, userId int64, ctx context.Context) ([]model.TodoGroup, error) {
 	startTime := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 	endTime := startTime.AddDate(0, 1, 0)
 	pipeline := mongo.Pipeline{
@@ -128,6 +131,7 @@ func findByMonthAndYear(month, year int, ctx context.Context) ([]model.TodoGroup
 					{"$gte", startTime},
 					{"$lt", endTime},
 				}},
+				{"userID", userId}, // 根据用户 ID 过滤
 			}},
 		},
 		{
