@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -18,6 +19,17 @@ func Cors(c *gin.Context) {
 	if method == "OPTIONS" {
 		c.AbortWithStatus(http.StatusNoContent)
 		return
+	}
+	c.Next()
+}
+
+func ValidApiKey(c *gin.Context) {
+	if c.Request.Header.Get("API-KEY") != os.Getenv("APIKEY") {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code": -1,
+			"msg":  "needed api key",
+		})
+		c.Abort()
 	}
 	c.Next()
 }
@@ -45,10 +57,8 @@ func AuthByJWT() func(c *gin.Context) {
 		_, err := VerifyToken(c, parts[1])
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"code":  -1,
-				"msg":   "Verify of Authorization is wrong",
-				"error": err.Error(),
-				"value": authHeader,
+				"code": -1,
+				"msg":  "Verify of Authorization is wrong",
 			})
 			c.Abort()
 			return
