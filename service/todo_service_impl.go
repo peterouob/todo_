@@ -13,7 +13,7 @@ import (
 )
 
 func findAllTodo(ctx context.Context, userId int64) ([]model.Todo, error) {
-	filter := bson.M{"userID": userId} // 根据用户 ID 过滤
+	filter := bson.M{"userID": userId}
 	sortFilter := bson.D{bson.E{Key: "deadTime", Value: 1}}
 	opts := options.Find().SetSort(sortFilter)
 	cursor, err := db.Mgo.Find(ctx, filter, opts)
@@ -24,12 +24,11 @@ func findAllTodo(ctx context.Context, userId int64) ([]model.Todo, error) {
 	if err := cursor.All(ctx, &result); err != nil {
 		return nil, errors.New("error in find all data from collection:" + err.Error())
 	}
-
 	return result, nil
 }
 
 func findTodoFilterDone(done bool, userId int64, ctx context.Context) ([]model.Todo, error) {
-	filter := bson.M{"done": done, "userID": userId} // 根据用户 ID 过滤
+	filter := bson.M{"done": done, "userID": userId}
 	sortFilter := bson.D{bson.E{Key: "deadTime", Value: 1}}
 
 	opts := options.Find().SetSort(sortFilter)
@@ -52,7 +51,7 @@ func findById(id primitive.ObjectID, userId int64, ctx context.Context) (model.T
 		return todo, errors.New("the id cannot be empty")
 	}
 
-	filter := bson.M{"_id": bson.M{"$eq": id}, "userID": userId} // 根据用户 ID 过滤
+	filter := bson.M{"_id": bson.M{"$eq": id}, "userID": userId}
 	err := db.Mgo.FindOne(ctx, filter).Decode(&todo)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return todo, errors.New("not found the id which want to find")
@@ -67,7 +66,7 @@ func deleteTodo(id primitive.ObjectID, userId int64, ctx context.Context) error 
 	if id.IsZero() {
 		return errors.New("the id cannot be empty")
 	}
-	filter := bson.M{"_id": bson.M{"$eq": id}, "userID": userId} // 根据用户 ID 过滤
+	filter := bson.M{"_id": bson.M{"$eq": id}, "userID": userId}
 	_, err := db.Mgo.DeleteOne(ctx, filter)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return errors.New("not found the id which want to delete")
@@ -82,7 +81,7 @@ func updateTodo(id primitive.ObjectID, req model.UpdateTodoRequest, userId int64
 	if id.IsZero() {
 		return errors.New("the id cannot be empty")
 	}
-	filter := bson.M{"_id": bson.M{"$eq": id}, "userID": userId} // 根据用户 ID 过滤
+	filter := bson.M{"_id": bson.M{"$eq": id}, "userID": userId}
 	update := bson.M{"$set": req}
 	result, err := db.Mgo.UpdateOne(ctx, filter, update)
 	if result.MatchedCount != 1 {
@@ -131,7 +130,7 @@ func findByMonthAndYear(month, year int, userId int64, ctx context.Context) ([]m
 					{"$gte", startTime},
 					{"$lt", endTime},
 				}},
-				{"userID", userId}, // 根据用户 ID 过滤
+				{"userID", userId},
 			}},
 		},
 		{
