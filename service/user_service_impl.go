@@ -8,8 +8,8 @@ import (
 )
 
 func loginUser(user model.User) (int64, error) {
-	if err := db.DB.Where("username=?", user.Username).Where("password=?", user.Password).First(&user).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-		return -1, errors.New("error in login user")
+	if err := db.DB.Where("username=?", user.Username).Where("password=?", user.Password).Find(&user).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		return -1, errors.New("error in login user" + err.Error())
 	}
 	return user.ID, nil
 }
