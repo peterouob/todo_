@@ -58,7 +58,7 @@ func AuthByJWT() func(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code": -1,
-				"msg":  "Verify of Authorization is wrong",
+				"msg":  "Verify of Authorization is wrong :" + err.Error(),
 			})
 			c.Abort()
 			return

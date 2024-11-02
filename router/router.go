@@ -12,7 +12,7 @@ func InitRouter(r *gin.Engine) {
 	r.POST("/login", service.LoginUser)
 	r.POST("/register", service.RegisterUser)
 	todo := r.Group("/todo")
-	todo.Use(utils.AuthByJWT())
+	//todo.Use(utils.AuthByJWT())
 	{
 		todo.GET("/", service.GetAllTodo)
 		todo.GET("/:id", service.GetTodoByID)

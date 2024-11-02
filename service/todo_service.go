@@ -204,13 +204,15 @@ func CreateTodo(c *gin.Context) {
 		return
 	}
 
-	if err = createTodo(todo, userId, context.TODO()); err != nil {
+	todo_id, err := createTodo(todo, userId, context.TODO())
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
 			"msg":  err.Error(),
 		})
 		return
 	}
+	todo.Id = todo_id.(primitive.ObjectID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,

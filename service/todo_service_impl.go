@@ -93,13 +93,13 @@ func updateTodo(id primitive.ObjectID, req model.UpdateTodoRequest, userId int64
 	return nil
 }
 
-func createTodo(todo model.Todo, id int64, ctx context.Context) error {
+func createTodo(todo model.Todo, id int64, ctx context.Context) (interface{}, error) {
 	todo.UserID = id
-	_, err := db.Mgo.InsertOne(ctx, todo)
+	result, err := db.Mgo.InsertOne(ctx, todo)
 	if err != nil {
-		return errors.New("error in insert data from collection:" + err.Error())
+		return nil, errors.New("error in insert data from collection:" + err.Error())
 	}
-	return nil
+	return result.InsertedID, nil
 }
 
 func doneTodo(id primitive.ObjectID, userId int64, ctx context.Context) error {
