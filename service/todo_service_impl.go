@@ -13,16 +13,17 @@ import (
 )
 
 func findAllTodo(ctx context.Context, userId int64) ([]model.Todo, error) {
+	var result []model.Todo
+
 	filter := bson.M{"userID": userId}
 	sortFilter := bson.D{bson.E{Key: "deadTime", Value: 1}}
 	opts := options.Find().SetSort(sortFilter)
 	cursor, err := db.Mgo.Find(ctx, filter, opts)
 	if err != nil {
-		return nil, errors.New("error in filter the data from collection:" + err.Error())
+		return result, errors.New("error in filter the data from collection:" + err.Error())
 	}
-	var result []model.Todo
 	if err := cursor.All(ctx, &result); err != nil {
-		return nil, errors.New("error in find all data from collection:" + err.Error())
+		return result, errors.New("didn't have any todo")
 	}
 	return result, nil
 }

@@ -26,9 +26,12 @@ func GetAllTodo(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
-			"msg":  err.Error(),
+			"msg":  data,
 		})
 		return
+	}
+	if len(data) == 0 {
+		data = []model.Todo{}
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
