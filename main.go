@@ -12,7 +12,7 @@ import (
 func main() {
 	go func() {
 		db.InitMysql()
-		db.InitMongo()
+		db.InitMongo(
 		db.InitRedis()
 	}()
 
