@@ -87,7 +87,7 @@ func LoginUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":          0,
-		"msg:":          "login success",
+		"msg":           "login success",
 		"data":          user,
 		"token":         tk,
 		"refresh_token": rtk,
