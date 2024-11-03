@@ -7,7 +7,7 @@ import (
 )
 
 func InitRouter(r *gin.Engine) {
-	r.Use(utils.Cors)
+	r.Use(utils.Cors, utils.ValidApiKey)
 	r.GET("/")
 	r.POST("/login", service.LoginUser)
 	r.POST("/register", service.RegisterUser)
