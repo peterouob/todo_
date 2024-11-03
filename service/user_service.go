@@ -73,9 +73,9 @@ func LoginUser(c *gin.Context) {
 		})
 		return
 	}
+	user.ID = uid
 
 	utils.SetCookie(c, "id", strconv.FormatInt(uid, 10))
-	user.ID = uid
 	tk, rtk, err := utils.CreateToken(uid)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
